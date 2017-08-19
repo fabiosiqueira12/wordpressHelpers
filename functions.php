@@ -1,8 +1,33 @@
 <?php
 
+
 //Adiciona suporte para cadastrar uma imagem de destaque em posts e páginas
 add_theme_support('post-thumbnails');
 add_image_size( 'thumb-custom', 800, 800, true);
+
+//Função que crias post types diferentes para o tema
+function meus_posts_types(){
+    //Habilidades
+    register_post_type('habilidades',
+        array(
+            'labels' => array(
+                'name' => __('Habilidades'),
+                'singular_name' => __('Habilidade'),   
+            ),
+            'public' => true,
+            'has_archive' => true,
+            'menu_icon' => 'dashicons-welcome-learn-more',
+            'supports' =>  array(
+                'title',
+                'editor',
+                'thumbnail',
+                'custom-fields',
+                'page-attributes',
+            )
+        )
+    );
+}
+add_action('init','meus_posts_types');
 
 //Função retorna imagem por nome
 /*
@@ -118,4 +143,26 @@ function listaRedesSociais($nome = "lista-redes"){
         $redesSociais[$key]["icone"] = $post->classes[0] . " " . $post->classes[1];
     }
     return $redesSociais;
+}
+
+//Função que remove galeria do content do post
+/*
+    Deixa apenas images e texto do post
+
+*/
+function strip_shortcode_gallery( $content ) {
+    preg_match_all( '/' . get_shortcode_regex() . '/s', $content, $matches, PREG_SET_ORDER );
+
+    if ( ! empty( $matches ) ) {
+        foreach ( $matches as $shortcode ) {
+            if ( 'gallery' === $shortcode[2] ) {
+                $pos = strpos( $content, $shortcode[0] );
+                if( false !== $pos ) {
+                    return substr_replace( $content, '', $pos, strlen( $shortcode[0] ) );
+                }
+            }
+        }
+    }
+
+    return $content;
 }
